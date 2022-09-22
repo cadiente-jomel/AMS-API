@@ -1,0 +1,7 @@
+logs
+venv
+.env
+.vscode
+.idea
+media
+.github
