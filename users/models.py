@@ -63,8 +63,10 @@ class Tenant(User):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField('Profile Image',
-        default="profiles/default/default.jpg", upload_to=profile_directory_path
+    image = models.ImageField(
+        "Profile Image",
+        default="profiles/default/default.jpg",
+        upload_to=profile_directory_path,
     )
     address = models.CharField(max_length=100, blank=True, null=True)
     phone = PhoneNumberField(region="PH", blank=True, null=True)
