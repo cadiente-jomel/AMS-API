@@ -27,6 +27,10 @@ INSTALLED_APPS = [
     "notifications.apps.NotificationsConfig",
     "analytics.apps.AnalyticsConfig",
     "users.apps.UsersConfig",
+    "emergency_contacts.apps.EmergencyContactsConfig",
+    "payments.apps.PaymentsConfig",
+    "buildings.apps.BuildingsConfig",
+    "faqs.apps.FaqsConfig",
 ]
 
 MIDDLEWARE = [
