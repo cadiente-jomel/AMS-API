@@ -1,6 +1,8 @@
 # local files imports
 from .base import *
+from colorama import init, Fore, Style
 
+init()
 
 DEBUG = True
 
@@ -12,6 +14,8 @@ INSTALLED_APPS += ["debug_toolbar"]
 
 
 MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 INTERNAL_IPS = ["127.0.0.1"]
@@ -57,7 +61,9 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {"format": "%(levelname)s - %(asctime)s - %(module)s : %(message)s"},
-        "simple": {"format": "[%(levelname)s] %(message)s"},
+        "simple": {
+            "format": f"[{Fore.GREEN}%(levelname)s]{Style.RESET_ALL} %(message)s"
+        },
     },
     "handlers": {
         "console": {
@@ -77,7 +83,12 @@ LOGGING = {
             "handlers": ["console", "file"],
             "propagate": True,
             "level": "INFO",
-        }
+        },
+        "secondary": {
+            "handlers": ["console"],
+            "propagate": True,
+            "level": "INFO",
+        },
     },
 }
 

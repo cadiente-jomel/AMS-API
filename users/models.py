@@ -1,8 +1,10 @@
 # standard libraries/modules
+from typing import Dict, Any
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from phonenumber_field.modelfields import PhoneNumberField
 from PIL import Image
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # local modules
 from core.models import BaseModel
@@ -12,6 +14,8 @@ from .managers import (
 )
 from .utils import profile_directory_path
 
+T = Dict[str, Any]
+
 
 class User(AbstractUser, BaseModel):
     class Role(models.TextChoices):
@@ -20,7 +24,13 @@ class User(AbstractUser, BaseModel):
         NOROLE = "NA", "NA"
 
     base_role = Role.NOROLE
+    email = models.CharField(max_length=155, unique=True)
     role = models.CharField(max_length=150, choices=Role.choices)
+    is_verified = models.BooleanField(
+        "Verfied",
+        help_text="Designates whether this user is verified or not.",
+        default=False,
+    )
 
     @property
     def get_full_name(self) -> str:
@@ -36,10 +46,18 @@ class User(AbstractUser, BaseModel):
         except:
             return f"No information provided."
 
+    @property
+    def tokens(self) -> T:
+        refresh_token = RefreshToken.for_user(self)
+        return {
+            "refresh_token": str(refresh_token),
+            "access_token": str(refresh_token.access_token),
+        }
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.role = self.base_role
-            return super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"{self.id} -> {self.email}"

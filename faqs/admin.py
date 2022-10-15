@@ -1,3 +1,11 @@
 from django.contrib import admin
+from .models import (
+    Answer,
+    Concern,
+    FAQ,
+)
 
-# Register your models here.
+
+admin.site.register(Answer)
+admin.site.register(Concern)
+admin.site.register(FAQ)

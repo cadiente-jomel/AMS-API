@@ -21,9 +21,12 @@ class Branch(BaseModel):
     building_type = models.CharField(max_length=30, choices=Type.choices)
 
     def __str__(self) -> str:
-        if self.branch is None:
+        if self.branch_name is None:
             return f"{self.location} branch"
         return f"{self.branch_name}"
+
+    class Meta:
+        verbose_name_plural = "Branches"
 
 
 class Room(BaseModel):
@@ -42,8 +45,8 @@ class Room(BaseModel):
 
     def __str__(self) -> str:
         if self.branch.branch_name is None:
-            return f"{self.branch.location} room"
-        return f"{self.branch.branch_name} room"
+            return f"{self.room_no} - {self.branch.location} room"
+        return f"{self.room_no} - {self.branch.branch_name} room"
 
 
 class TenantRoom(BaseModel):
@@ -51,4 +54,4 @@ class TenantRoom(BaseModel):
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return f"{self.tenant.get_full_name} room"
+        return f"room {self.room.room_no} - {self.tenant.get_full_name}"

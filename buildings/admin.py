@@ -1,3 +1,10 @@
 from django.contrib import admin
+from .models import (
+    Branch,
+    Room,
+    TenantRoom,
+)
 
-# Register your models here.
+admin.site.register(Branch)
+admin.site.register(Room)
+admin.site.register(TenantRoom)

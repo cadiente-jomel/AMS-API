@@ -2,7 +2,7 @@ from django.db import models
 
 from core.models import BaseModel
 from buildings.models import Branch, TenantRoom
-from users.models import Landlord
+from users.models import User
 
 from .utils import generate_complaint_id
 
@@ -26,11 +26,10 @@ class FAQ(BaseModel):
 
 class Concern(BaseModel):
     class ConcernType(models.TextChoices):
-        PAYMENT = 'Payment', 'Payment Concern'
-        ROOM = 'Room', 'Room Concern'
-        SUGGESTION = 'Suggestion', 'Suggestion'
-        OTHER = 'Other', 'Other Concern'
-
+        PAYMENT = "Payment", "Payment Concern"
+        ROOM = "Room", "Room Concern"
+        SUGGESTION = "Suggestion", "Suggestion"
+        OTHER = "Other", "Other Concern"
 
     complaint_id = models.CharField(
         max_length=50, unique=True, editable=False, default=generate_complaint_id
@@ -44,7 +43,8 @@ class Concern(BaseModel):
     def __str__(self) -> str:
         return f"{self.title}"
 
+
 class Answer(BaseModel):
     complaint_id = models.ForeignKey(Concern, on_delete=models.CASCADE)
-    answered_by = models.ForeignKey(Landlord, null=True, on_delete=models.SET_NULL)
+    answered_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     answer = models.CharField(max_length=500)
