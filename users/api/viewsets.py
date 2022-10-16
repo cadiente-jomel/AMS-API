@@ -21,13 +21,15 @@ from rest_framework import (
     mixins,
 )
 from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import (
     OutstandingToken,
     BlacklistedToken,
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
 from dotenv import load_dotenv
 
 import jwt
@@ -45,6 +47,12 @@ from .serializers import (
 )
 from users.utils import Email
 from users.models import User, Landlord, Tenant
+from core.permissions import (
+    IsLandlordAuthenticated, 
+    IsTenantAuthenticated, 
+    IsUserAuthenticated, 
+    IsAdministratorAuthenticated
+)
 
 load_dotenv()
 logger = logging.getLogger("secondary")
@@ -192,7 +200,7 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
 class LogoutAPIView(generics.GenericAPIView):
     serializer_class = LogoutSerializer
     permission_classes = [
-        AllowAny,
+        IsAuthenticated,
     ]
 
     def post(self, request):
@@ -213,6 +221,8 @@ class LogoutAPIView(generics.GenericAPIView):
 
 
 class LogoutAllAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated, ]
+
     @transaction.atomic()
     def post(self, request):
         try:
@@ -230,50 +240,104 @@ class LogoutAllAPIView(generics.GenericAPIView):
             )
 
 
-class LandlordAPIView(generics.GenericAPIView):
-    serializer_class = LandlordSerializer
-    permission_classes = [AllowAny]
+class UserAPIView(
+    generics.GenericAPIView, 
+    mixins.ListModelMixin
+):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdministratorAuthenticated, ]
 
     def get(self, request, *args, **kwargs):
-        landlords = Landlord.objects.all()
-
-        return landlords
+        return self.list(request, *args, **kwargs)
 
 
-class RetrieveUserAPIView(mixins.RetrieveModelMixin, generics.GenericAPIView):
+class LandlordAPIView(
+    generics.GenericAPIView, 
+    mixins.ListModelMixin
+):
+    queryset = Landlord.objects.all()
+    serializer_class = LandlordSerializer
+    permission_classes = [IsAdministratorAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+class RetrieveUserAPIView(
+    mixins.RetrieveModelMixin, 
+    generics.GenericAPIView
+):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [
-        AllowAny,
+        IsUserAuthenticated,
     ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(self, *args, **kwargs)
 
+    def put(self, request, *args, **kwargs):
+        serializer = self.serializer_class(
+            data=request.data,
+            instance=self.get_object(),
+            context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True) 
 
-class RetrieveLandlordAPIView(mixins.RetrieveModelMixin, generics.GenericAPIView):
+        validated_data = serializer.validated_data["id"]
+
+        if not validated_data == request.user.id:
+            return Response(
+                {"detail": "You don't have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_update(self, serializer) -> None:
+        serializer.save()
+
+
+class RetrieveLandlordAPIView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin 
+):
     queryset = Landlord.objects.all()
     serializer_class = LandlordSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsLandlordAuthenticated, ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
 
-class TenantAPIView(generics.GenericAPIView):
+class TenantAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
     serializer_class = TenantSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsLandlordAuthenticated, IsAdministratorAuthenticated]
+
+    def get_queryset(self):
+        try:
+            queryset = Tenant.objects.filter(
+                tenantroom__room__branch__assigned_landlord=self.request.user
+            )
+        except Tenant.DoesNotExist as err:
+            raise ValidationError(detail="Invalid parameter.")
+
+        return queryset
 
     def get(self, request, *args, **kwargs):
-        tenants = Tenant.objects.all()
+        return self.list(request, *args, **kwargs)
 
-        return tenants
-
-
-class RetrieveTenantAPIView(mixins.RetrieveModelMixin, generics.GenericAPIView):
+class RetrieveTenantAPIView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin 
+):
     queryset = Tenant.objects.all()
     serializer_class = TenantSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsUserAuthenticated, ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
