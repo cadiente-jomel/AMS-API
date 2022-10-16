@@ -1,5 +1,7 @@
 from rest_framework import permissions
 from buildings.models import TenantRoom, Room, Branch
+from faqs.models import Answer
+from users.models import User, Tenant, Landlord, UserProfile
 
 
 class IsLandlordAuthenticated(permissions.BasePermission):
@@ -21,6 +23,9 @@ class IsLandlordAuthenticated(permissions.BasePermission):
         
         if isinstance(obj, Branch):
             return bool(obj.assigned_landlord == request.user)
+
+        if isinstance(obj, Landlord):
+            return bool(obj == request.user)
 
 class IsTenantAuthenticated(permissions.BasePermission):
     """Check if the current logged in user is tenant."""
@@ -45,5 +50,16 @@ class IsUserAuthenticated(permissions.BasePermission):
         )
 
     def has_object_parmission(self, request, view, obj) -> bool:
-        return bool(obj.answered_by == request.user)
+        if isinstance(obj, Answer):
+            return bool(obj.answered_by == request.user)
 
+        if isinstance(obj, Tenant) or isinstance(obj, Landlord):
+            return bool(obj == request.user)
+
+class IsAdministratorAuthenticated(permissions.BasePermission):
+    def has_permission(self, request, view) -> bool:
+        return bool(
+            request.user or 
+            request.is_authenticated or 
+            request.user.role.is_superuser
+        )

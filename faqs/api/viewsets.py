@@ -68,7 +68,7 @@ class FAQAPIView(mixins.ListModelMixin, generics.GenericAPIView):
             serializer.save()
         except:
             return Response(default_error_message, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class RetrieveFAQAPIView(
@@ -104,6 +104,9 @@ class RetrieveFAQAPIView(
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+    def perform_update(self, serializer) -> None:
+        serializer.save()
 
 
 class AnswerAPIView(generics.GenericAPIView):
@@ -242,5 +245,5 @@ class RetrieveConcernAPIView(
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
-    def perform_updte(self, serializer) -> None:
+    def perform_update(self, serializer) -> None:
         serializer.save()
