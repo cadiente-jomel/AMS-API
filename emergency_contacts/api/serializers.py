@@ -2,7 +2,7 @@ from rest_framework import serializers
 from emergency_contacts.models import EmergencyContact
 
 
-class EmergencyContactSerializer(serializers.HyperlinkedIdentitySerializer):
+class EmergencyContactSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EmergencyContact
         fields = [

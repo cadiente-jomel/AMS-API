@@ -23,6 +23,7 @@ class EmergencyContactsAPIView(
     permission_classes = [IsUserAuthenticated, ]
     
     def get_queryset(self):
+        branch = self.request.query_params.get("branch", None)
         user = self.request.user
         if user.role == "T":
             queryset = EmergencyContact.objects.select_related(
@@ -33,6 +34,9 @@ class EmergencyContactsAPIView(
         queryset = EmergencyContact.objects.select_related(
             "branch"
         ).filter(branch__assigned_landlord=user)
+
+        if branch is not None:
+            queryset = queryset.filter(branch_id=branch)
 
         return queryset
         
