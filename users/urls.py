@@ -10,6 +10,7 @@ from .api.viewsets import (
     PasswordTokenCheckAPIView,
     SetNewPasswordAPIView,
     RetrieveUserAPIView,
+    RetrieveUserProfileAPIView,
     LandlordAPIView,
     RetrieveLandlordAPIView,
     TenantAPIView,
@@ -41,6 +42,7 @@ urlpatterns = [
         name="password-reset-complete",
     ),
     path("users/<int:pk>", RetrieveUserAPIView.as_view(), name="user-detail"),
+    path("user-profiles/<int:pk>", RetrieveUserProfileAPIView.as_view(), name="user-profile-detail"),
     path("landlords", LandlordAPIView.as_view(), name="landlord-list"),
     path(
         "landlords/<int:pk>", RetrieveLandlordAPIView.as_view(), name="landlord-detail"
