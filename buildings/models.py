@@ -50,7 +50,7 @@ class Room(BaseModel):
 
 
 class TenantRoom(BaseModel):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="tenantroom")
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
 
     def __str__(self) -> str:

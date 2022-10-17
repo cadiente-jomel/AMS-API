@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from buildings.models import TenantRoom, Room, Branch
+from emergency_contacts.models import EmergencyContact
 from faqs.models import Answer
 from users.models import User, Tenant, Landlord, UserProfile
 
@@ -55,6 +56,13 @@ class IsUserAuthenticated(permissions.BasePermission):
 
         if isinstance(obj, Tenant) or isinstance(obj, Landlord):
             return bool(obj == request.user)
+
+
+        if isinstance(obj, EmergencyContact):
+            user = request.user 
+            if user.role == "LL":
+                return bool(obj.branch.assigned_landlord == user)
+            return False
 
 class IsAdministratorAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view) -> bool:
