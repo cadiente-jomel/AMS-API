@@ -1,5 +1,6 @@
 import os
 import logging
+from django.http.request import MultiPartParser
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db import IntegrityError
@@ -20,6 +21,7 @@ from rest_framework import (
     status,
     mixins,
 )
+from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -42,11 +44,17 @@ from .serializers import (
     ResetPasswordEmailRequestSerializer,
     SetNewPasswordSerializer,
     UserSerializer,
+    UserProfileSerializer,
     LandlordSerializer,
     TenantSerializer,
 )
 from users.utils import Email
-from users.models import User, Landlord, Tenant
+from users.models import (
+    User, 
+    Landlord, 
+    Tenant, 
+    UserProfile
+)
 from core.permissions import (
     IsLandlordAuthenticated, 
     IsTenantAuthenticated, 
@@ -250,6 +258,40 @@ class UserAPIView(
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+
+class RetrieveUserProfileAPIView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+):
+    queryset = UserProfile.objects.select_related("user").all()
+    serializer_class = UserProfileSerializer
+    permissions_classes = [IsUserAuthenticated, ]
+    parser_classes = [MultiPartParser, ]
+    
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.serializer_class(
+            data=request.data,
+            instance=self.get_object(),
+            context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        validated_data = serializer.validated_data["user"]
+        if not validated_data == request.user:
+            return Response(
+                {"detail": "You don't have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_update(self, serializer) -> None:
+        serializer.save()
 
 
 class LandlordAPIView(

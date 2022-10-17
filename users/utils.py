@@ -18,8 +18,8 @@ def profile_directory_path(instance: "User", filename: str) -> str:
     :result str: Directory path.file_extension.
     """
 
-    image_name, extension = os.path.splitteext(filename)
-    name = instance.get_full_name.lower().replace(" ", "_")
+    image_name, extension = os.path.splitext(filename)
+    name = instance.user.get_full_name.lower().replace(" ", "_")
     return f"profiles/{name}/{image_name}{extension}"
 
 

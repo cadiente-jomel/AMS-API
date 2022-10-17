@@ -57,6 +57,8 @@ class IsUserAuthenticated(permissions.BasePermission):
         if isinstance(obj, Tenant) or isinstance(obj, Landlord):
             return bool(obj == request.user)
 
+        if isinstance(obj, UserProfile):
+            return bool(obj.user == request.user)
 
         if isinstance(obj, EmergencyContact):
             user = request.user 

@@ -249,4 +249,8 @@ class LandlordSerializer(serializers.HyperlinkedModelSerializer):
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ["user" "address", "image", "phone"]
+        fields = ["url", "user", "address", "image", "phone"]
+        extra_kwargs = {
+            "url": {"view_name": "users:user-profile-detail"},
+            "user": {"view_name": "users:user-detail"}
+        } 
