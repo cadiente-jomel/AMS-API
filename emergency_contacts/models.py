@@ -17,9 +17,9 @@ class EmergencyContact(BaseModel):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     contact_no = PhoneNumberField(region="PH", blank=True, null=True)
     type = models.CharField(
-        "Emergency Number", max_length=30, choices=EmergencyNo.choices
+        "Emergency Number", max_length=30, choices=EmergencyNo.choices, blank=True, null=True
     )
     other = models.CharField("Other Number", max_length=150, blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"{self.type} contanct information for {self.branch.location} branch"
+        return f"{self.type} contact information for {self.branch.location} branch"

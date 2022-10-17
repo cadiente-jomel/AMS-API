@@ -285,7 +285,6 @@ class RetrieveUserAPIView(
         serializer.is_valid(raise_exception=True) 
 
         validated_data = serializer.validated_data["id"]
-
         if not validated_data == request.user.id:
             return Response(
                 {"detail": "You don't have permission to perform this action."},

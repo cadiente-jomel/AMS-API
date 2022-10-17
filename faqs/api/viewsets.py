@@ -233,7 +233,7 @@ class RetrieveConcernAPIView(
         serializer.is_valid(raise_exception=True)
         
         validated_data = serializer.validated_data["complained_by"]
-        if not validated_data != request.user:
+        if not validated_data == request.user:
             return Response(
                 {"detail": "You don't have permission to perform this action."}, 
                 status=status.HTTP_403_FORBIDDEN
