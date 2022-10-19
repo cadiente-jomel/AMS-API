@@ -42,6 +42,12 @@ class Room(BaseModel):
     type = models.CharField(
         "Room Type", max_length=10, choices=Type.choices, default=Type.SHARED
     )
+    rent_price = models.DecimalField(
+        default=0.00,
+        max_digits=6, 
+        decimal_places=2, 
+        help_text="If the type is 'Shared' make sure to enter the price per head."
+    )
 
     def __str__(self) -> str:
         if self.branch.branch_name is None:
@@ -52,6 +58,7 @@ class Room(BaseModel):
 class TenantRoom(BaseModel):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="tenantroom")
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+    start_date = models.DateField(blank=True, null=True)
 
     def __str__(self) -> str:
         return f"room {self.room.room_no} - {self.tenant.get_full_name}"
