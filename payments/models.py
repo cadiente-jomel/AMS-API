@@ -1,3 +1,5 @@
+import logging
+import calendar
 from decimal import Decimal, getcontext
 from django.utils.timezone import datetime
 from django.db import models
@@ -12,6 +14,7 @@ from core.models import BaseModel
 from .utils import generate_transation_number
 
 getcontext().prec = 2
+logger = logging.getLogger("secondary")
 
 class Payment(BaseModel):
     class STATUS(models.TextChoices):
@@ -35,10 +38,17 @@ class Payment(BaseModel):
         return f"Payment issued to {self.tenant.tenant.get_full_name}"
     
     @property
-    def number_of_months(self) -> int:
+    def number_of_months(self) -> Decimal:
         """ Calculate how many months have pass relative to date provided"""
-        delta = relativedelta.relativedelta(self.start_date, self.end_date)
-        return delta.months
+        current_days_of_the_month = calendar.monthrange(self.end_date.year, self.end_date.month)[1]
+        number_of_months =  relativedelta.relativedelta(self.end_date, self.start_date).months
+        excess_days = abs(self.end_date.day - self.start_date.day) / current_days_of_the_month
+        total_days = float(format(number_of_months + excess_days, '.2f'))
+        logger.info(f"current_days_of_the_month: {current_days_of_the_month}")
+        logger.info(f"number number_of_months: {number_of_months}")
+        logger.info(f"excess days: {excess_days}")
+        logger.info(f"total: {total_days}")
+        return Decimal(total_days)
 
     def save(self, *args, **kwargs):
         if self.status != "pd" and self.type == "R":
@@ -51,10 +61,9 @@ class Transaction(BaseModel):
     date_received = models.DateField()
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name="payment_transactions")
     
-    @property
-    def remaining_balance(self) -> Decimal:
-        return Decimal(self.payment.amount) - Decimal(self.payment_received)
-        
     def __str__(self):
         return f"{self.transaction_no}"
 
+    @property
+    def remaining_balance(self) -> Decimal:
+        return Decimal(self.payment.amount) - Decimal(self.payment_received)
