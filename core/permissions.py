@@ -3,6 +3,7 @@ from buildings.models import TenantRoom, Room, Branch
 from emergency_contacts.models import EmergencyContact
 from faqs.models import Answer
 from users.models import User, Tenant, Landlord, UserProfile
+from payments.models import Transaction, Payment
 
 
 class IsLandlordAuthenticated(permissions.BasePermission):
@@ -27,6 +28,9 @@ class IsLandlordAuthenticated(permissions.BasePermission):
 
         if isinstance(obj, Landlord):
             return bool(obj == request.user)
+
+        if isinstance(obj, Payment):
+            return bool(obj.tenant.room.branch.assigned_landlord == request.user)
 
 class IsTenantAuthenticated(permissions.BasePermission):
     """Check if the current logged in user is tenant."""
@@ -65,6 +69,19 @@ class IsUserAuthenticated(permissions.BasePermission):
             if user.role == "LL":
                 return bool(obj.branch.assigned_landlord == user)
             return False
+
+        if isinstance(obj, Payment):
+            return bool(
+                obj.tenant.tenant == request.user or 
+                obj.tenant.room.branch.assigned_landlord == request.user
+            )
+
+        if isinstance(obj, Transaction):
+            user = obj.payment.tenant
+            return bool(
+                user.tenant == request.user or 
+                user.room.branch.assigned_landlord == request.user
+            )
 
 class IsAdministratorAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view) -> bool:
