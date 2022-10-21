@@ -1,6 +1,7 @@
 import logging
 import calendar
 from decimal import Decimal, getcontext
+from django.db.models import Sum
 from django.utils.timezone import datetime
 from django.db import models
 
@@ -66,4 +67,7 @@ class Transaction(BaseModel):
 
     @property
     def remaining_balance(self) -> Decimal:
-        return Decimal(self.payment.amount) - Decimal(self.payment_received)
+        total = Transaction.objects.select_related(
+            "payment"
+        ).filter(payment=self.payment).aggregate(total=Sum("payment_received"))
+        return Decimal(self.payment.amount) - Decimal(total['total'])

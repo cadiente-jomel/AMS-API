@@ -22,6 +22,7 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             "url": {"view_name": "payments:payment-detail"},
             "tenant": {"view_name": "buildings:tenantroom-detail"},
+            "amount": {"allow_null": True, "required": False},
         }
 
     def validate(self, attrs):
@@ -45,10 +46,10 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
                 raise serializers.ValidationError("start date cannot be greater than end date.")
 
         return attrs
- 
+
 
 class TransactionSerializer(serializers.HyperlinkedModelSerializer):
-    remaining_balance = serializers.ReadOnlyField()
+    # remaining_balance = serializers.ReadOnlyField()
 
     class Meta:
         model = Transaction
@@ -57,7 +58,6 @@ class TransactionSerializer(serializers.HyperlinkedModelSerializer):
             "id",
             "transaction_no",
             "payment_received",
-            "remaining_balance",
             "date_received",
             "payment"
         ]
