@@ -25,7 +25,7 @@ class AnalyticsPaymentsSerializer(serializers.Serializer):
 class AnalyticsBranchSerializer(serializers.Serializer):
     count_tickets = serializers.IntegerField()
     count_answered = serializers.IntegerField()
-    count_unanswred = serializers.IntegerField()
+    count_unanswered = serializers.IntegerField()
 
 
 class AnalyticsTransactionSerializer(serializers.Serializer):
