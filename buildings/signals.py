@@ -7,8 +7,8 @@ from payments.models import Payment
 
 @receiver(post_save, sender=TenantRoom)
 def create_payment(sender, instance, created, **kwargs) -> None:
-    number_of_days = calendar.monthrange(instance.start_date.year, instance.start_date.month)[1]
     if created:
+        number_of_days = calendar.monthrange(instance.start_date.year, instance.start_date.month)[1]
         payment = Payment(
             tenant=instance,
             start_date=instance.start_date,
