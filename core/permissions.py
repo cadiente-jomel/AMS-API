@@ -8,11 +8,10 @@ from payments.models import Transaction, Payment
 
 class IsLandlordAuthenticated(permissions.BasePermission):
     """Check if the current logged in user is landlord."""
+
     def has_permission(self, request, view) -> bool:
         return bool(
-            request.user and 
-            request.user.is_authenticated and 
-            request.user.role == "LL"
+            request.user and request.user.is_authenticated and request.user.role == "LL"
         )
 
     def has_object_permission(self, request, view, obj) -> bool:
@@ -22,7 +21,7 @@ class IsLandlordAuthenticated(permissions.BasePermission):
 
         if isinstance(obj, Room):
             return bool(obj.branch.assigned_landlord == request.user)
-        
+
         if isinstance(obj, Branch):
             return bool(obj.assigned_landlord == request.user)
 
@@ -32,14 +31,13 @@ class IsLandlordAuthenticated(permissions.BasePermission):
         if isinstance(obj, Payment):
             return bool(obj.tenant.room.branch.assigned_landlord == request.user)
 
+
 class IsTenantAuthenticated(permissions.BasePermission):
     """Check if the current logged in user is tenant."""
 
     def has_permission(self, request, view) -> bool:
         return bool(
-            request.user and 
-            request.user.is_authenticated and
-            request.user.role == "T"
+            request.user and request.user.is_authenticated and request.user.role == "T"
         )
 
     def has_object_permission(self, request, view, obj) -> bool:
@@ -48,11 +46,9 @@ class IsTenantAuthenticated(permissions.BasePermission):
 
 class IsUserAuthenticated(permissions.BasePermission):
     """Check if a user is logged in regardless of role"""
+
     def has_permission(self, request, view) -> bool:
-        return bool(
-            request.user and 
-            request.user.is_authenticated
-        )
+        return bool(request.user and request.user.is_authenticated)
 
     def has_object_parmission(self, request, view, obj) -> bool:
         if isinstance(obj, Answer):
@@ -65,28 +61,27 @@ class IsUserAuthenticated(permissions.BasePermission):
             return bool(obj.user == request.user)
 
         if isinstance(obj, EmergencyContact):
-            user = request.user 
+            user = request.user
             if user.role == "LL":
                 return bool(obj.branch.assigned_landlord == user)
             return False
 
         if isinstance(obj, Payment):
             return bool(
-                obj.tenant.tenant == request.user or 
-                obj.tenant.room.branch.assigned_landlord == request.user
+                obj.tenant.tenant == request.user
+                or obj.tenant.room.branch.assigned_landlord == request.user
             )
 
         if isinstance(obj, Transaction):
             user = obj.payment.tenant
             return bool(
-                user.tenant == request.user or 
-                user.room.branch.assigned_landlord == request.user
+                user.tenant == request.user
+                or user.room.branch.assigned_landlord == request.user
             )
+
 
 class IsAdministratorAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view) -> bool:
         return bool(
-            request.user or 
-            request.is_authenticated or 
-            request.user.role.is_superuser
+            request.user or request.is_authenticated or request.user.role.is_superuser
         )

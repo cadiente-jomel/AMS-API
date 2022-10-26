@@ -44,9 +44,9 @@ class Room(BaseModel):
     )
     rent_price = models.DecimalField(
         default=0.00,
-        max_digits=6, 
-        decimal_places=2, 
-        help_text="If the type is 'Shared' make sure to enter the price per head."
+        max_digits=6,
+        decimal_places=2,
+        help_text="If the type is 'Shared' make sure to enter the price per head.",
     )
 
     def __str__(self) -> str:

@@ -34,7 +34,9 @@ class Concern(BaseModel):
     complaint_id = models.CharField(
         max_length=50, unique=True, editable=False, default=generate_complaint_id
     )
-    complained_by = models.ForeignKey(TenantRoom, on_delete=models.CASCADE, related_name="tenant_concern")
+    complained_by = models.ForeignKey(
+        TenantRoom, on_delete=models.CASCADE, related_name="tenant_concern"
+    )
     title = models.CharField(max_length=250)
     body = models.CharField(max_length=500)
     type = models.CharField("Concern Type", max_length=50, choices=ConcernType.choices)

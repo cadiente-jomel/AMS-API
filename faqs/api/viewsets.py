@@ -21,7 +21,7 @@ from users.models import (
 
 from buildings.models import Branch
 from core.permissions import (
-    IsLandlordAuthenticated, 
+    IsLandlordAuthenticated,
     IsTenantAuthenticated,
     IsUserAuthenticated,
 )
@@ -72,23 +72,20 @@ class FAQAPIView(mixins.ListModelMixin, generics.GenericAPIView):
 
 
 class RetrieveFAQAPIView(
-    DestroyInstanceMixin,
-    mixins.RetrieveModelMixin, 
-    generics.GenericAPIView
+    DestroyInstanceMixin, mixins.RetrieveModelMixin, generics.GenericAPIView
 ):
     queryset = FAQ.objects.select_related("branch").all()
     serializer_class = FAQSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
-
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(
-            data=request.data,
-            instance=self.get_object(),
-            context={"request": request}
+            data=request.data, instance=self.get_object(), context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
 
@@ -96,7 +93,7 @@ class RetrieveFAQAPIView(
         if not validated_data.assigned_landlord == request.user:
             return Response(
                 {"detail": "You don't have permission to perform this action"},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         self.perform_update(serializer)
@@ -126,30 +123,28 @@ class AnswerAPIView(generics.GenericAPIView):
 
 
 class RetrieveAnswerAPIView(
-    DestroyInstanceMixin,
-    mixins.RetrieveModelMixin, 
-    generics.GenericAPIView
+    DestroyInstanceMixin, mixins.RetrieveModelMixin, generics.GenericAPIView
 ):
     queryset = Answer.objects.select_related("complaint_id", "answered_by").all()
     serializer_class = AnswerSerializer
-    permission_classes = [IsUserAuthenticated, ]
+    permission_classes = [
+        IsUserAuthenticated,
+    ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(
-            data=request.data,
-            instance=self.get_object(),
-            context={"request": request}
+            data=request.data, instance=self.get_object(), context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
 
         validated_data = serializer.validated_data["answered_by"]
         if not validated_data == request.user:
             return Response(
-                {"detail": "You don't have permission to perform this action."}, 
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "You don't have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         self.perform_update(serializer)
@@ -157,7 +152,6 @@ class RetrieveAnswerAPIView(
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
-
 
     def perform_update(self, serializer) -> None:
         serializer.save()
@@ -204,12 +198,12 @@ class ConcernAPIView(mixins.ListModelMixin, generics.GenericAPIView):
 
 
 class RetrieveConcernAPIView(
-    DestroyInstanceMixin, 
-    mixins.RetrieveModelMixin, 
-    generics.GenericAPIView
+    DestroyInstanceMixin, mixins.RetrieveModelMixin, generics.GenericAPIView
 ):
     serializer_class = ConcernSerializer
-    permission_classes = [IsUserAuthenticated, ]
+    permission_classes = [
+        IsUserAuthenticated,
+    ]
 
     def get_queryset(self):
         # TODO changed this to current logged in user later.
@@ -226,17 +220,15 @@ class RetrieveConcernAPIView(
     @transaction.atomic()
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(
-            data=request.data,
-            instance=self.get_object(),
-            context={"request": request}
+            data=request.data, instance=self.get_object(), context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        
+
         validated_data = serializer.validated_data["complained_by"]
         if not validated_data == request.user:
             return Response(
-                {"detail": "You don't have permission to perform this action."}, 
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "You don't have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         self.perform_update(serializer)

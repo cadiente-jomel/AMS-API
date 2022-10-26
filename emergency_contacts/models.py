@@ -17,7 +17,11 @@ class EmergencyContact(BaseModel):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     contact_no = PhoneNumberField(region="PH", blank=True, null=True)
     type = models.CharField(
-        "Emergency Number", max_length=30, choices=EmergencyNo.choices, blank=True, null=True
+        "Emergency Number",
+        max_length=30,
+        choices=EmergencyNo.choices,
+        blank=True,
+        null=True,
     )
     other = models.CharField("Other Number", max_length=150, blank=True, null=True)
 

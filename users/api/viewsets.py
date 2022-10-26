@@ -49,17 +49,12 @@ from .serializers import (
     TenantSerializer,
 )
 from users.utils import Email
-from users.models import (
-    User, 
-    Landlord, 
-    Tenant, 
-    UserProfile
-)
+from users.models import User, Landlord, Tenant, UserProfile
 from core.permissions import (
-    IsLandlordAuthenticated, 
-    IsTenantAuthenticated, 
-    IsUserAuthenticated, 
-    IsAdministratorAuthenticated
+    IsLandlordAuthenticated,
+    IsTenantAuthenticated,
+    IsUserAuthenticated,
+    IsAdministratorAuthenticated,
 )
 
 load_dotenv()
@@ -229,7 +224,9 @@ class LogoutAPIView(generics.GenericAPIView):
 
 
 class LogoutAllAPIView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [
+        IsAuthenticated,
+    ]
 
     @transaction.atomic()
     def post(self, request):
@@ -248,13 +245,12 @@ class LogoutAllAPIView(generics.GenericAPIView):
             )
 
 
-class UserAPIView(
-    generics.GenericAPIView, 
-    mixins.ListModelMixin
-):
+class UserAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdministratorAuthenticated, ]
+    permission_classes = [
+        IsAdministratorAuthenticated,
+    ]
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -266,17 +262,19 @@ class RetrieveUserProfileAPIView(
 ):
     queryset = UserProfile.objects.select_related("user").all()
     serializer_class = UserProfileSerializer
-    permissions_classes = [IsUserAuthenticated, ]
-    parser_classes = [MultiPartParser, ]
-    
+    permissions_classes = [
+        IsUserAuthenticated,
+    ]
+    parser_classes = [
+        MultiPartParser,
+    ]
+
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(
-            data=request.data,
-            instance=self.get_object(),
-            context={"request": request}
+            data=request.data, instance=self.get_object(), context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
 
@@ -284,7 +282,7 @@ class RetrieveUserProfileAPIView(
         if not validated_data == request.user:
             return Response(
                 {"detail": "You don't have permission to perform this action."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         self.perform_update(serializer)
@@ -294,10 +292,7 @@ class RetrieveUserProfileAPIView(
         serializer.save()
 
 
-class LandlordAPIView(
-    generics.GenericAPIView, 
-    mixins.ListModelMixin
-):
+class LandlordAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     queryset = Landlord.objects.all()
     serializer_class = LandlordSerializer
     permission_classes = [IsAdministratorAuthenticated]
@@ -305,10 +300,8 @@ class LandlordAPIView(
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-class RetrieveUserAPIView(
-    mixins.RetrieveModelMixin, 
-    generics.GenericAPIView
-):
+
+class RetrieveUserAPIView(mixins.RetrieveModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [
@@ -320,17 +313,15 @@ class RetrieveUserAPIView(
 
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(
-            data=request.data,
-            instance=self.get_object(),
-            context={"request": request}
+            data=request.data, instance=self.get_object(), context={"request": request}
         )
-        serializer.is_valid(raise_exception=True) 
+        serializer.is_valid(raise_exception=True)
 
         validated_data = serializer.validated_data["id"]
         if not validated_data == request.user.id:
             return Response(
                 {"detail": "You don't have permission to perform this action."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         self.perform_update(serializer)
@@ -340,13 +331,12 @@ class RetrieveUserAPIView(
         serializer.save()
 
 
-class RetrieveLandlordAPIView(
-    generics.GenericAPIView,
-    mixins.RetrieveModelMixin 
-):
+class RetrieveLandlordAPIView(generics.GenericAPIView, mixins.RetrieveModelMixin):
     queryset = Landlord.objects.all()
     serializer_class = LandlordSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -372,13 +362,13 @@ class TenantAPIView(
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-class RetrieveTenantAPIView(
-    generics.GenericAPIView,
-    mixins.RetrieveModelMixin 
-):
+
+class RetrieveTenantAPIView(generics.GenericAPIView, mixins.RetrieveModelMixin):
     queryset = Tenant.objects.all()
     serializer_class = TenantSerializer
-    permission_classes = [IsUserAuthenticated, ]
+    permission_classes = [
+        IsUserAuthenticated,
+    ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
