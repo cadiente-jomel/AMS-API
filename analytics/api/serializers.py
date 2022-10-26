@@ -12,7 +12,7 @@ from buildings.models import TenantRoom
 # total tickets
 #   total reports
 #   total suggestions
-#   total Unpaid Transaction 
+#   total Unpaid Transaction
 class AnalyticsPaymentsSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     count_due_date = serializers.IntegerField()
@@ -31,9 +31,11 @@ class AnalyticsBranchSerializer(serializers.Serializer):
 class AnalyticsTransactionSerializer(serializers.Serializer):
     count_transaction = serializers.IntegerField()
 
+
 class AnalyticsOverviewSerializer(serializers.Serializer):
     pass
 
+
 class AnalyticsSerializer(serializers.Serializer):
     payments = AnalyticsPaymentsSerializer()
-    branch = AnalyticsBranchSerializer() 
+    branch = AnalyticsBranchSerializer()

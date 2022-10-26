@@ -252,5 +252,5 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["url", "user", "address", "image", "phone"]
         extra_kwargs = {
             "url": {"view_name": "users:user-profile-detail"},
-            "user": {"view_name": "users:user-detail"}
-        } 
+            "user": {"view_name": "users:user-detail"},
+        }

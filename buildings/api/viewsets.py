@@ -16,11 +16,14 @@ from buildings.models import (
 )
 from users.models import Landlord, Tenant
 
-logger = logging.getLogger('secondary')
+logger = logging.getLogger("secondary")
+
 
 class BranchAPIView(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = BranchSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get_queryset(self):
         tenant = self.request.user
@@ -31,11 +34,16 @@ class BranchAPIView(mixins.ListModelMixin, generics.GenericAPIView):
 
     def post(self, request):
         try:
-            serializer = self.serializer_class(data=request.data, context={"request": request})
+            serializer = self.serializer_class(
+                data=request.data, context={"request": request}
+            )
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
         except Exception as err:
-            return Response({"error": "Something went wrong while performing this action."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "Something went wrong while performing this action."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, *args, **kwargs):
@@ -46,12 +54,12 @@ class BranchAPIView(mixins.ListModelMixin, generics.GenericAPIView):
 
 
 class RetrieveBranchAPIView(
-    mixins.RetrieveModelMixin, 
-    mixins.DestroyModelMixin, 
-    generics.GenericAPIView
+    mixins.RetrieveModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView
 ):
     serializer_class = BranchSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get_queryset(self):
         user = self.request.user
@@ -66,17 +74,15 @@ class RetrieveBranchAPIView(
 
     def put(self, request, *aargs, **kwargs):
         serializer = self.serializer_class(
-            data=request.data, 
-            instance=self.get_object, 
-            context={"request": request}
+            data=request.data, instance=self.get_object, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
 
         validated_data = serializer.validated_data["assigned_landlord"]
         if not validated_data == request.user:
             return Response(
-                {"detail": "You don't have permission to perform this action."}, 
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "You don't have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         self.perform_update(serializer)
@@ -88,15 +94,18 @@ class RetrieveBranchAPIView(
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
+
 class RoomAPIView(generics.GenericAPIView):
     serializer_class = RoomSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
-    
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
+
     def get_queryset(self):
         user = self.request.user
-        objs = Room.objects.select_related(
-            "branch"
-        ).filter(branch__assigned_landlord=user)
+        objs = Room.objects.select_related("branch").filter(
+            branch__assigned_landlord=user
+        )
 
         return objs
 
@@ -105,9 +114,12 @@ class RoomAPIView(generics.GenericAPIView):
         serializer = RoomSerializer(queryset, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class BranchRoomAPIView(generics.GenericAPIView):
     serializer_class = RoomSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get_queryset(self):
         branch = self.kwargs.get("pk", None)
@@ -131,34 +143,36 @@ class BranchRoomAPIView(generics.GenericAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
     def post(self, request):
         try:
-            serializer = self.serializer_class(data=request.data, context={"request": request})
+            serializer = self.serializer_class(
+                data=request.data, context={"request": request}
+            )
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
         except Exception as err:
-            return Response({"error": "Something went wrong while performing this action."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "Something went wrong while performing this action."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class RetrieveRoomAPIView(
-    mixins.RetrieveModelMixin, 
-    mixins.DestroyModelMixin, 
-    generics.GenericAPIView
+    mixins.RetrieveModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView
 ):
     queryset = Room.objects.select_related("branch").all()
     serializer_class = RoomSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(
-            data=request.data, 
-            instance=self.get_object(), 
-            context={"request": request}
+            data=request.data, instance=self.get_object(), context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
 
@@ -166,7 +180,7 @@ class RetrieveRoomAPIView(
         if not validated_data.assigned_landlord == request.user:
             return Response(
                 {"detail": "You don't have permission to perform this action."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         self.perform_update(serializer)
@@ -181,7 +195,9 @@ class RetrieveRoomAPIView(
 
 class TenantRoomAPIView(generics.GenericAPIView):
     serializer_class = TenantRoomSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get_queryset(self):
         branch = self.kwargs["pk"]
@@ -200,23 +216,32 @@ class TenantRoomAPIView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            serializer = self.serializer_class(data=request.data, context={"request": request})
+            serializer = self.serializer_class(
+                data=request.data, context={"request": request}
+            )
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
         except Exception as err:
-            return Response({"error": "Something went wrong while performing this action."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "Something went wrong while performing this action."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
 
     def get(self, request, *args, **kwargs):
-        user_id = TenantRoom.objects.filter(
-            room__branch__id=kwargs["pk"]
-        ).first().room.branch.assigned_landlord.pk
-        
+        user_id = (
+            TenantRoom.objects.filter(room__branch__id=kwargs["pk"])
+            .first()
+            .room.branch.assigned_landlord.pk
+        )
+
         # TODO  make this if block a decorator if it becomes repetitive.
         if not request.user.id == user_id:
-            return Response({"detail": "You don't have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "You don't have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         queryset = self.get_queryset()
         if not queryset.exists():
@@ -235,18 +260,20 @@ class TenantRoomAPIView(generics.GenericAPIView):
 
 
 class RetrieveTenantRoomAPIView(
-    DestroyInstanceMixin, 
+    DestroyInstanceMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
     queryset = TenantRoom.objects.all()
     serializer_class = TenantRoomSerializer
-    permission_classes = [IsLandlordAuthenticated, ]
+    permission_classes = [
+        IsLandlordAuthenticated,
+    ]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
-    
+
     @transaction.atomic()
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
@@ -254,22 +281,19 @@ class RetrieveTenantRoomAPIView(
     @transaction.atomic()
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(
-            data=request.data, 
-            instance=self.get_object(), 
-            context={"request": request}
+            data=request.data, instance=self.get_object(), context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
 
         validated_data = serializer.validated_data["room"]
         if not validated_data.branch.assigned_landlord == request.user:
             return Response(
-                {"detail": "You don't have permission to perform this action."}, 
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "You don't have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        self.perform_update(serializer)  
+        self.perform_update(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_update(self, serializer) -> None:
         serializer.save()
-

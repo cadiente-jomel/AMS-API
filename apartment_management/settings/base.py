@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     "phonenumber_field",
     # apps
     "core.apps.CoreConfig",
-    "notifications.apps.NotificationsConfig",
     "analytics.apps.AnalyticsConfig",
     "users.apps.UsersConfig",
     "emergency_contacts.apps.EmergencyContactsConfig",
