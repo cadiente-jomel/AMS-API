@@ -5,6 +5,8 @@ from rest_framework import (
     status,
 )
 from rest_framework.response import Response
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from core.permissions import (
     IsLandlordAuthenticated,
@@ -13,6 +15,10 @@ from core.permissions import (
 from core.mixins import DestroyInstanceMixin
 from emergency_contacts.models import EmergencyContact
 from .serializers import EmergencyContactSerializer
+
+emergency_parameter = openapi.Parameter(
+    "branch", openapi.IN_QUERY, description="ID of the branch", type=openapi.TYPE_STRING
+)
 
 
 class EmergencyContactsAPIView(
@@ -23,6 +29,9 @@ class EmergencyContactsAPIView(
     permission_classes = [
         IsUserAuthenticated,
     ]
+    user_response = openapi.Response(
+        "Return all available contacts to a specific branch", EmergencyContactSerializer
+    )
 
     def get_queryset(self):
         branch = self.request.query_params.get("branch", None)
@@ -42,6 +51,9 @@ class EmergencyContactsAPIView(
 
         return queryset
 
+    @swagger_auto_schema(
+        manual_parameters=[emergency_parameter], responses={200: user_response}
+    )
     def get(self, request, *args, **kwargs):
         if request.user.role == "NA":
             return Response(

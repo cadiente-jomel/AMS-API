@@ -17,20 +17,28 @@ from buildings.models import Branch
 from core.permissions import IsLandlordAuthenticated
 
 logger = logging.getLogger("secondary")
-analytics_parameter = openapi.Parameter("branch_id", openapi.IN_QUERY, description="ID of the specific branch", type=openapi.TYPE_STRING)
+analytics_parameter = openapi.Parameter(
+    "branch_id",
+    openapi.IN_QUERY,
+    description="ID of the specific branch",
+    type=openapi.TYPE_STRING,
+)
+
 
 class AnalyticsPaymentAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = AnalyticsPaymentsSerializer
     permission_classes = [
         IsLandlordAuthenticated,
     ]
-    
+
     user_response = openapi.Response(
         "Payment analytics for specific branches By default, without the parameter, it aggregates all the payments of all the branches the landlord assigned to combine.",
-        AnalyticsPaymentsSerializer
+        AnalyticsPaymentsSerializer,
     )
-    
-    @swagger_auto_schema(manual_parameters=[analytics_parameter], responses={200: user_response})
+
+    @swagger_auto_schema(
+        manual_parameters=[analytics_parameter], responses={200: user_response}
+    )
     def get(self, request, *args, **kwargs):
         queryset = Payment.objects.filter(
             tenant__room__branch__assigned_landlord=request.user
@@ -72,10 +80,12 @@ class AnalyticsBranchAPIView(generics.GenericAPIView):
 
     user_response = openapi.Response(
         "By default, it counts the total number of tickets to all the branches the landlord has assigned to. Specify the parameter to count it per branch.",
-        AnalyticsBranchSerializer
+        AnalyticsBranchSerializer,
     )
-    
-    @swagger_auto_schema(manual_parameters=[analytics_parameter], responses={200: user_response})
+
+    @swagger_auto_schema(
+        manual_parameters=[analytics_parameter], responses={200: user_response}
+    )
     def get(self, request, *args, **kwargs):
         queryset = Branch.objects.filter(assigned_landlord=request.user)
         data = dict()
@@ -105,10 +115,12 @@ class AnalyticsTransactionSerializer(generics.GenericAPIView):
     ]
     user_response = openapi.Response(
         "By default, it counts the total number of transactions to all the branches the landlord has assigned to. Specify the parameter to count it per branch.",
-        AnalyticsTransactionSerializer
-    ) 
+        AnalyticsTransactionSerializer,
+    )
 
-    @swagger_auto_schema(manual_parameters=[analytics_parameter], responses={200: user_response})
+    @swagger_auto_schema(
+        manual_parameters=[analytics_parameter], responses={200: user_response}
+    )
     def get(self, request, *args, **kwargs):
         queryset = Transaction.objects.filter(
             payment__tenant__room__branch__assigned_landlord=request.user
