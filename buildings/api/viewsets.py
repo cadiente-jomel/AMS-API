@@ -4,6 +4,8 @@ from rest_framework import status, generics, mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import RoomSerializer, BranchSerializer, TenantRoomSerializer
 
@@ -17,6 +19,12 @@ from buildings.models import (
 from users.models import Landlord, Tenant
 
 logger = logging.getLogger("secondary")
+buildings_parameter = openapi.Parameter(
+    "room",
+    openapi.IN_QUERY,
+    description="ID of a specific room",
+    type=openapi.TYPE_STRING,
+)
 
 
 class BranchAPIView(mixins.ListModelMixin, generics.GenericAPIView):
@@ -198,6 +206,10 @@ class TenantRoomAPIView(generics.GenericAPIView):
     permission_classes = [
         IsLandlordAuthenticated,
     ]
+    user_response = openapi.Response(
+        "By default it returns all tenant on a specific branch, specify room parameter to get all tenants to a specific room.",
+        TenantRoomSerializer,
+    )
 
     def get_queryset(self):
         branch = self.kwargs["pk"]
@@ -229,6 +241,9 @@ class TenantRoomAPIView(generics.GenericAPIView):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @swagger_auto_schema(
+        manual_parameters=[buildings_parameter], responses={200: user_response}
+    )
     def get(self, request, *args, **kwargs):
         user_id = (
             TenantRoom.objects.filter(room__branch__id=kwargs["pk"])

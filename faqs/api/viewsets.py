@@ -6,6 +6,8 @@ from rest_framework import mixins
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import (
     FAQSerializer,
@@ -31,11 +33,18 @@ logger = logging.getLogger("secondary")
 default_error_message = {
     "error": "Something went wrong, make sure to check your request."
 }
+faq_parameter = openapi.Parameter(
+    "branch", openapi.IN_QUERY, description="ID of the branch", type=openapi.TYPE_STRING
+)
 
 
 class FAQAPIView(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = FAQSerializer
     permission_classes = [AllowAny]
+
+    user_response = openapi.Response(
+        "Return the FAQ of a specific branch.", FAQSerializer
+    )
 
     def get_queryset(self):
 
@@ -45,6 +54,9 @@ class FAQAPIView(mixins.ListModelMixin, generics.GenericAPIView):
 
         return faqs
 
+    @swagger_auto_schema(
+        manual_parameters=[faq_parameter], responses={200: user_response}
+    )
     def get(self, request, *args, **kwargs):
         reqparams = request.query_params.get("branch", None)
 
@@ -161,6 +173,10 @@ class ConcernAPIView(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = ConcernSerializer
     permission_classes = [AllowAny]
 
+    user_response = openapi.Response(
+        "Return all the concern specific to a branch.", ConcernSerializer
+    )
+
     def get_queryset(self):
         branch = self.request.query_params.get("branch", None)
 
@@ -170,6 +186,9 @@ class ConcernAPIView(mixins.ListModelMixin, generics.GenericAPIView):
 
         return concern
 
+    @swagger_auto_schema(
+        manual_parameters=[faq_parameter], responses={200: user_response}
+    )
     def get(self, request, *args, **kwargs):
         reqparams = request.query_params.get("branch", None)
 
