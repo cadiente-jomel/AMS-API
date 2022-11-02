@@ -2,7 +2,7 @@ import logging
 from django.contrib import admin
 from django.apps import apps
 
-logger = logging.getLogger("main")
+logger = logging.getLogger("secondary")
 
 app = apps.get_app_config("payments")
 for model in app.get_models():
