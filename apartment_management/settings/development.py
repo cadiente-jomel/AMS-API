@@ -7,7 +7,7 @@ init()
 DEBUG = True
 
 
-ALLOWED_HOST = []
+ALLOWED_HOST = ["ams-api-production.up.railway.app", "localhost"]
 
 
 INSTALLED_APPS += ["debug_toolbar"]
