@@ -71,12 +71,12 @@ LOGGING = {
             "formatter": "simple",
             "level": "INFO",
         },
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": "logs/debug.log",
-            "formatter": "verbose",
-            "level": "WARNING",
-        },
+        # "file": {
+        #     "class": "logging.FileHandler",
+        #     "filename": "logs/debug.log",
+        #     "formatter": "verbose",
+        #     "level": "WARNING",
+        # },
     },
     "loggers": {
         "main": {
