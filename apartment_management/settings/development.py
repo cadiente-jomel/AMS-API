@@ -80,7 +80,7 @@ LOGGING = {
     },
     "loggers": {
         "main": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "propagate": True,
             "level": "INFO",
         },
